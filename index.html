@@ -1,302 +1,685 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediStock LPI - Controle de Estoque</title>
+    <title>MedStock - Controle de Estoque de Medicamentos</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
         }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .scroll-custom::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-
-        .sidebar-item.active {
-            background-color: #2563eb;
-            color: white;
+        .scroll-custom::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-
-        .status-badge {
-            padding: 2px 8px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .scroll-custom::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
         }
-
-        .alert-critical { background-color: #fee2e2; color: #dc2626; }
-        .alert-warning { background-color: #fef3c7; color: #d97706; }
-        .alert-success { background-color: #d1fae5; color: #059669; }
-
-        #login-screen {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        .scroll-custom::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
-<body class="h-screen overflow-hidden">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Tela de Login -->
-    <div id="login-screen" class="fixed inset-0 z-[100] flex items-center justify-center">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-tr from-cyan-900 via-slate-900 to-blue-900 p-4">
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 max-w-md w-full border border-white/20">
             <div class="text-center mb-8">
-                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-hand-holding-medical text-blue-600 text-3xl"></i>
+                <div class="inline-flex items-center justify-center p-3 bg-cyan-100 text-cyan-700 rounded-full mb-3">
+                    <i class="fa-solid fa-file-waveform text-3xl"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-800">MediStock LPI</h1>
-                <p class="text-gray-500">Acesso Restrito ao Sistema</p>
+                <h1 class="text-3xl font-extrabold text-slate-900">MedStock</h1>
+                <p class="text-slate-500 text-sm mt-1">Sistema de Controle de Estoque Hospitalar</p>
             </div>
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Usuário</label>
-                    <input type="text" id="username" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Digite seu usuário" required>
+            
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Usuário</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="username" required placeholder="Digite 'admin' ou 'operador'" 
+                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-200">
+                    </div>
                 </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Senha</label>
-                    <input type="password" id="password" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="••••••••" required>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Senha</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="password" required placeholder="Digite qualquer senha" 
+                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-200">
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition transform hover:scale-[1.02]">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Perfil de Acesso</label>
+                    <select id="user-role" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-200">
+                        <option value="Administrador">Administrador (Acesso Total)</option>
+                        <option value="Operador">Operador (Acesso Limitado)</option>
+                    </select>
+                </div>
+                
+                <div id="login-error" class="hidden text-red-600 text-sm text-center font-medium bg-red-50 p-2.5 rounded-lg border border-red-100">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Usuário incorreto.
+                </div>
+
+                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-xl shadow-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                     Entrar no Sistema
                 </button>
             </form>
-            <p class="text-center mt-6 text-xs text-gray-400">© 2024 LPI Medical Systems - Todos os direitos reservados</p>
+            <div class="mt-6 text-center text-xs text-slate-400">
+                LPI — Projeto MedStock &copy; 2026
+            </div>
         </div>
     </div>
 
-    <!-- Layout Principal -->
-    <div id="main-app" class="hidden h-full flex flex-col md:flex-row">
-        <!-- Sidebar -->
-        <aside class="w-full md:w-64 bg-white border-r border-gray-200 flex flex-col">
-            <div class="p-6 border-b border-gray-100 flex items-center gap-3">
-                <i class="fas fa-laptop-medical text-blue-600 text-2xl"></i>
-                <span class="font-bold text-xl text-gray-800">MediStock</span>
+    <!-- ÁREA PRINCIPAL DO SISTEMA (Inicialmente Oculta) -->
+    <div id="main-app" class="hidden flex flex-col md:flex-row min-h-screen">
+        
+        <!-- SIDEBAR DE NAVEGAÇÃO -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white flex flex-col border-r border-slate-800 shrink-0">
+            <!-- Header do Sidebar -->
+            <div class="p-5 flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-file-waveform text-cyan-400 text-2xl"></i>
+                    <span class="text-xl font-bold tracking-tight text-white">MedStock</span>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-toggle" class="text-slate-400 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
             </div>
-            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <button onclick="showSection('dashboard')" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fas fa-chart-line"></i> Dashboard
+
+            <!-- Identidade do Usuário Autenticado -->
+            <div class="p-4 bg-slate-800/50 border-b border-slate-800 flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center text-white font-bold" id="user-avatar">
+                    AD
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <h4 class="font-medium text-sm text-slate-200 truncate" id="logged-username">Nome Usuário</h4>
+                    <span class="text-xs text-cyan-400 font-semibold" id="logged-role">Administrador</span>
+                </div>
+            </div>
+
+            <!-- Links de Navegação -->
+            <nav id="sidebar-nav" class="flex-1 p-4 space-y-1.5 overflow-y-auto scroll-custom">
+                <button onclick="switchTab('dashboard')" class="tab-link active w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition duration-150 text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-chart-pie w-5"></i>
+                    <span class="text-sm font-medium">Dashboard</span>
                 </button>
-                <button onclick="showSection('medicamentos')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fas fa-pills"></i> Medicamentos
+                <button onclick="switchTab('medicamentos')" class="tab-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition duration-150 text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-pills w-5"></i>
+                    <span class="text-sm font-medium">Medicamentos</span>
                 </button>
-                <button onclick="showSection('pacientes')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fas fa-user-injured"></i> Pacientes
+                <button onclick="switchTab('movimentacoes')" class="tab-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition duration-150 text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-right-left w-5"></i>
+                    <span class="text-sm font-medium">Movimentação</span>
                 </button>
-                <button onclick="showSection('movimentacao')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fas fa-exchange-alt"></i> Movimentação
+                <button onclick="switchTab('pacientes')" class="tab-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition duration-150 text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-user-injured w-5"></i>
+                    <span class="text-sm font-medium">Pacientes</span>
                 </button>
-                <button onclick="showSection('relatorios')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fas fa-file-alt"></i> Relatórios
+                <button onclick="switchTab('alertas')" class="tab-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition duration-150 text-slate-300 hover:bg-slate-800 hover:text-white relative">
+                    <i class="fa-solid fa-bell w-5"></i>
+                    <span class="text-sm font-medium">Alertas</span>
+                    <span id="badge-total-alertas" class="absolute right-4 top-3.5 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                </button>
+                <button onclick="switchTab('relatorios')" class="tab-link w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition duration-150 text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-file-invoice-dollar w-5"></i>
+                    <span class="text-sm font-medium">Relatórios</span>
                 </button>
             </nav>
-            <div class="p-4 border-t border-gray-100">
-                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition">
-                    <i class="fas fa-sign-out-alt"></i> Sair
+
+            <!-- Rodapé do Sidebar / Logout -->
+            <div class="p-4 border-t border-slate-800">
+                <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-red-900/30 hover:text-red-400 text-slate-400 py-2.5 rounded-xl transition duration-150 text-sm font-medium">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Sair do Sistema</span>
                 </button>
             </div>
         </aside>
 
-        <!-- Conteúdo Principal -->
-        <main class="flex-1 flex flex-col overflow-hidden">
-            <!-- Header -->
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
-                <h2 id="section-title" class="text-xl font-semibold text-gray-800">Dashboard</h2>
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <i class="fas fa-bell text-gray-400 text-xl cursor-pointer"></i>
-                        <span id="alert-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                            <i class="fas fa-user text-blue-600 text-sm"></i>
-                        </div>
-                        <span class="text-sm font-medium text-gray-700" id="current-user-display">Farmacêutico</span>
-                    </div>
+        <!-- ÁREA DE CONTEÚDO -->
+        <main class="flex-1 flex flex-col overflow-x-hidden">
+            <!-- Topbar Móvel / Identificação -->
+            <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <h2 class="text-xl font-semibold text-slate-800" id="current-page-title">Dashboard</h2>
+                </div>
+                <div class="text-slate-500 text-sm font-medium">
+                    <span id="current-date">--/--/----</span>
                 </div>
             </header>
 
-            <!-- Seções -->
-            <div class="flex-1 p-8 overflow-y-auto bg-gray-50">
-                
-                <!-- DASHBOARD -->
-                <section id="dashboard-section" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <p class="text-gray-400 text-sm">Total Medicamentos</p>
-                            <h3 class="text-2xl font-bold" id="dash-total-meds">0</h3>
+            <!-- Container do Conteúdo Dinâmico -->
+            <div class="p-6 flex-1 overflow-y-auto scroll-custom max-w-7xl w-full mx-auto space-y-6">
+
+                <!-- FEEDBACK POPUP DE SUCESSO/ERRO -->
+                <div id="toast" class="hidden fixed bottom-5 right-5 z-50 transform transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3">
+                    <span id="toast-icon" class="text-emerald-400"><i class="fa-solid fa-circle-check text-lg"></i></span>
+                    <span id="toast-message" class="text-sm font-medium">Operação realizada com sucesso!</span>
+                </div>
+
+                <!-- TELA: DASHBOARD -->
+                <section id="tab-dashboard" class="tab-content space-y-6">
+                    <!-- Cards de Resumo Rápido -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total de Itens</p>
+                                <h3 id="dash-total-itens" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                            </div>
+                            <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                                <i class="fa-solid fa-box text-xl"></i>
+                            </div>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <p class="text-gray-400 text-sm">Estoque Baixo</p>
-                            <h3 class="text-2xl font-bold text-orange-500" id="dash-low-stock">0</h3>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Estoque Crítico</p>
+                                <h3 id="dash-estoque-critico" class="text-2xl font-bold text-red-600 mt-1">0</h3>
+                            </div>
+                            <div class="p-3 bg-red-50 text-red-600 rounded-xl">
+                                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                            </div>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <p class="text-gray-400 text-sm">Próximos ao Vencimento</p>
-                            <h3 class="text-2xl font-bold text-blue-500" id="dash-near-exp">0</h3>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Próximos do Vencimento</p>
+                                <h3 id="dash-proximos-vencimento" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
+                            </div>
+                            <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                                <i class="fa-solid fa-hourglass-half text-xl"></i>
+                            </div>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <p class="text-gray-400 text-sm">Itens Vencidos</p>
-                            <h3 class="text-2xl font-bold text-red-500" id="dash-expired">0</h3>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Pacientes</p>
+                                <h3 id="dash-total-pacientes" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
+                            </div>
+                            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                                <i class="fa-solid fa-hospital-user text-xl"></i>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Alertas Inteligentes -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <i class="fas fa-exclamation-triangle text-orange-500"></i> Alertas Críticos
-                            </h4>
-                            <div id="alerts-container" class="space-y-3">
-                                <!-- Dinâmico -->
-                            </div>
-                        </div>
-                        <!-- Histórico Rápido -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h4 class="font-bold text-gray-800 mb-4">Últimas Movimentações</h4>
-                            <div id="recent-history" class="text-sm space-y-3">
-                                <!-- Dinâmico -->
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- MEDICAMENTOS -->
-                <section id="medicamentos-section" class="hidden space-y-6">
-                    <div class="flex justify-between items-center">
-                        <button onclick="toggleModal('modal-medicamento')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                            + Novo Medicamento
-                        </button>
+                    <!-- Consulta Rápida -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                        <h3 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-magnifying-glass mr-2 text-cyan-500"></i>Consulta Rápida de Saldo</h3>
                         <div class="relative">
-                            <input type="text" onkeyup="filterTable('table-meds', this.value)" placeholder="Buscar medicamento..." class="pl-10 pr-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                <i class="fa-solid fa-search"></i>
+                            </span>
+                            <input type="text" id="quick-search-input" onkeyup="filterQuickSearch()" placeholder="Digite o nome do medicamento para verificar quantidade disponível..." 
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                         </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-                        <table class="w-full text-left border-collapse" id="table-meds">
-                            <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Medicamento</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Categoria</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Qtd / Mín</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Validade</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="meds-list-body" class="divide-y divide-gray-100">
-                                <!-- Dinâmico -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- PACIENTES -->
-                <section id="pacientes-section" class="hidden space-y-6">
-                    <div class="flex justify-between items-center">
-                        <button onclick="toggleModal('modal-paciente')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                            + Novo Paciente
-                        </button>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Paciente</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Diagnóstico</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Familiar Responsável</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Telefone</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="patients-list-body" class="divide-y divide-gray-100">
-                                <!-- Dinâmico -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- MOVIMENTAÇÃO -->
-                <section id="movimentacao-section" class="hidden space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
-                            <h3 class="font-bold text-blue-700 mb-4"><i class="fas fa-plus-circle"></i> Entrada de Estoque</h3>
-                            <form onsubmit="handleMovement(event, 'IN')">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="col-span-2">
-                                        <label class="block text-xs font-bold text-gray-500 mb-1">Medicamento</label>
-                                        <select id="mov-in-med" class="w-full p-2 border rounded-lg" required></select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-500 mb-1">Quantidade</label>
-                                        <input type="number" id="mov-in-qty" class="w-full p-2 border rounded-lg" required min="1">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-500 mb-1">Lote</label>
-                                        <input type="text" id="mov-in-lot" class="w-full p-2 border rounded-lg">
-                                    </div>
-                                </div>
-                                <button type="submit" class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg font-bold">Registrar Entrada</button>
-                            </form>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-100">
-                            <h3 class="font-bold text-red-700 mb-4"><i class="fas fa-minus-circle"></i> Saída (Uso do Paciente)</h3>
-                            <form onsubmit="handleMovement(event, 'OUT')">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="col-span-2">
-                                        <label class="block text-xs font-bold text-gray-500 mb-1">Paciente</label>
-                                        <select id="mov-out-patient" class="w-full p-2 border rounded-lg" required></select>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <label class="block text-xs font-bold text-gray-500 mb-1">Medicamento</label>
-                                        <select id="mov-out-med" class="w-full p-2 border rounded-lg" required></select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-500 mb-1">Quantidade</label>
-                                        <input type="number" id="mov-out-qty" class="w-full p-2 border rounded-lg" required min="1">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-500 mb-1">Período de Uso</label>
-                                        <input type="text" id="mov-out-period" class="w-full p-2 border rounded-lg" placeholder="ex: 7 dias">
-                                    </div>
-                                </div>
-                                <button type="submit" class="mt-4 w-full bg-red-600 text-white py-2 rounded-lg font-bold">Registrar Saída</button>
-                            </form>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- RELATÓRIOS -->
-                <section id="relatorios-section" class="hidden space-y-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-xl font-bold text-gray-800">Relatório Geral do Estoque</h3>
-                            <button onclick="window.print()" class="text-blue-600 hover:underline">Imprimir PDF</button>
-                        </div>
-                        <div id="report-summary" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                            <!-- Cards de resumo -->
-                        </div>
-                        <h4 class="font-bold text-gray-600 mb-4">Histórico Completo de Movimentações</h4>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
-                                <thead class="bg-gray-50">
+                        <div class="overflow-x-auto scroll-custom border border-slate-100 rounded-xl hidden" id="quick-search-results-container">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
                                     <tr>
-                                        <th class="px-4 py-2 text-left">Data/Hora</th>
-                                        <th class="px-4 py-2 text-left">Tipo</th>
-                                        <th class="px-4 py-2 text-left">Item</th>
-                                        <th class="px-4 py-2 text-left">Qtd</th>
-                                        <th class="px-4 py-2 text-left">Referência</th>
+                                        <th class="py-3 px-4">Medicamento</th>
+                                        <th class="py-3 px-4">Categoria</th>
+                                        <th class="py-3 px-4">Lote</th>
+                                        <th class="py-3 px-4 text-center">Saldo Atual</th>
+                                        <th class="py-3 px-4">Validade</th>
+                                        <th class="py-3 px-4 text-center">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody id="full-history-body" class="divide-y divide-gray-100">
+                                <tbody id="quick-search-results" class="divide-y divide-slate-100 text-sm text-slate-700">
                                     <!-- Dinâmico -->
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Alertas Urgentes -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[350px]">
+                            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center justify-between">
+                                <span><i class="fa-solid fa-circle-exclamation text-red-500 mr-2"></i>Alertas de Risco Crítico</span>
+                                <span class="text-xs bg-red-100 text-red-700 font-bold px-2.5 py-1 rounded-full" id="alert-critical-count">0 Ativos</span>
+                            </h3>
+                            <div class="flex-1 overflow-y-auto scroll-custom space-y-3 pr-2" id="dash-alerts-list">
+                                <!-- Dinâmico -->
+                            </div>
+                        </div>
+
+                        <!-- Atividades Recentes -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[350px]">
+                            <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                                <i class="fa-solid fa-history text-slate-500 mr-2"></i>Últimas Movimentações
+                            </h3>
+                            <div class="flex-1 overflow-y-auto scroll-custom space-y-3 pr-2" id="dash-recent-activities">
+                                <!-- Dinâmico -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TELA: MEDICAMENTOS -->
+                <section id="tab-medicamentos" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        
+                        <!-- Formulário de Cadastro (Esquerda) -->
+                        <div class="w-full lg:w-1/3 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-fit space-y-5">
+                            <h3 class="text-lg font-bold text-slate-800" id="med-form-title">
+                                <i class="fa-solid fa-plus-circle text-cyan-500 mr-2"></i>Cadastrar Medicamento
+                            </h3>
+                            <form id="med-form" class="space-y-4">
+                                <input type="hidden" id="med-edit-id">
+                                
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome do Medicamento *</label>
+                                    <input type="text" id="med-nome" required placeholder="Ex: Paracetamol 500mg" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Categoria *</label>
+                                        <select id="med-categoria" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                            <option value="Analgésico">Analgésico</option>
+                                            <option value="Antibiótico">Antibiótico</option>
+                                            <option value="Anti-inflamatório">Anti-inflamatório</option>
+                                            <option value="Anti-hipertensivo">Anti-hipertensivo</option>
+                                            <option value="Antitérmico">Antitérmico</option>
+                                            <option value="Outros">Outros</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Lote *</label>
+                                        <input type="text" id="med-lote" required placeholder="Ex: LOT992" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Quantidade Inicial *</label>
+                                        <input type="number" id="med-quantidade" required min="0" placeholder="Ex: 100" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estoque Mínimo *</label>
+                                        <input type="number" id="med-estoque-minimo" required min="1" placeholder="Ex: 20" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data de Validade *</label>
+                                    <input type="date" id="med-validade" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Observações</label>
+                                    <textarea id="med-observacoes" rows="2" placeholder="Informações adicionais, conservação..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none text-sm"></textarea>
+                                </div>
+
+                                <div class="flex space-x-2">
+                                    <button type="button" onclick="resetMedForm()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2.5 rounded-xl transition">Limpar</button>
+                                    <button type="submit" id="btn-salvar-med" class="w-2/3 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2.5 rounded-xl transition">Salvar</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Listagem de Medicamentos (Direita) -->
+                        <div class="w-full lg:w-2/3 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col space-y-4">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <h3 class="text-lg font-bold text-slate-800">Medicamentos no Inventário</h3>
+                                <div class="relative w-full sm:w-64">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                                    </span>
+                                    <input type="text" id="inventory-search" onkeyup="renderMedicamentos()" placeholder="Pesquisar..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto scroll-custom border border-slate-100 rounded-xl">
+                                <table class="w-full text-left border-collapse">
+                                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                                        <tr>
+                                            <th class="py-3.5 px-4">Medicamento</th>
+                                            <th class="py-3.5 px-4">Categoria/Lote</th>
+                                            <th class="py-3.5 px-4 text-center">Saldo</th>
+                                            <th class="py-3.5 px-4">Validade</th>
+                                            <th class="py-3.5 px-4 text-center">Status</th>
+                                            <th class="py-3.5 px-4 text-right">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="med-table-body" class="divide-y divide-slate-100 text-sm text-slate-700">
+                                        <!-- Dinâmico -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- TELA: MOVIMENTAÇÕES -->
+                <section id="tab-movimentacoes" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col lg:flex-row gap-6">
+
+                        <!-- Registrar Movimentação (Esquerda) -->
+                        <div class="w-full lg:w-2/5 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-fit space-y-4">
+                            <h3 class="text-lg font-bold text-slate-800">
+                                <i class="fa-solid fa-right-left text-cyan-500 mr-2"></i>Lançar Movimentação
+                            </h3>
+                            
+                            <!-- Seleção de Tipo de Movimento -->
+                            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+                                <button type="button" id="btn-type-entrada" onclick="setMovType('ENTRADA')" class="py-2 text-center rounded-lg font-bold text-sm bg-white text-emerald-600 shadow-sm transition">
+                                    <i class="fa-solid fa-arrow-turn-down mr-1"></i> Entrada
+                                </button>
+                                <button type="button" id="btn-type-saida" onclick="setMovType('SAIDA')" class="py-2 text-center rounded-lg font-bold text-sm text-slate-600 hover:text-slate-900 transition">
+                                    <i class="fa-solid fa-arrow-turn-up mr-1"></i> Saída (Paciente)
+                                </button>
+                            </div>
+
+                            <form id="mov-form" class="space-y-4">
+                                <input type="hidden" id="mov-tipo" value="ENTRADA">
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Medicamento *</label>
+                                    <select id="mov-medicamento-id" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                        <option value="">Selecione o item...</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Quantidade *</label>
+                                        <input type="number" id="mov-quantidade" required min="1" placeholder="Ex: 5" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                    </div>
+                                    <div class="hidden" id="saida-dosagem-group">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Dosagem do Registro *</label>
+                                        <input type="text" id="mov-dosagem" placeholder="Ex: 1 comp (500mg)" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                    </div>
+                                </div>
+
+                                <!-- SEÇÃO DO PACIENTE (SÓ APARECE SE FOR SAÍDA) -->
+                                <div id="mov-paciente-section" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                                    <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center">
+                                        <i class="fa-solid fa-user-injured mr-1.5 text-cyan-600"></i> Vínculo de Paciente
+                                    </h4>
+                                    
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 mb-1">Selecionar Paciente Cadastrado</label>
+                                        <select id="mov-paciente-id" onchange="autofillPatientData()" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                            <option value="">-- Selecionar Paciente --</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="relative flex py-2 items-center">
+                                        <div class="flex-grow border-t border-slate-200"></div>
+                                        <span class="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase">Ou preencher dados novos abaixo</span>
+                                        <div class="flex-grow border-t border-slate-200"></div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 mb-1">Nome Completo do Paciente *</label>
+                                        <input type="text" id="mov-paciente-nome" placeholder="Nome Completo" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Data Nascimento *</label>
+                                            <input type="date" id="mov-paciente-nascimento" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Diagnóstico *</label>
+                                            <input type="text" id="mov-paciente-diagnostico" placeholder="Ex: Hipertensão" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Período de Uso *</label>
+                                            <input type="text" id="mov-paciente-periodo" placeholder="Ex: 7 dias" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Período de Administração *</label>
+                                            <input type="text" id="mov-paciente-administracao" placeholder="Ex: A cada 8 horas" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-xl shadow-md transition duration-200">
+                                    Registrar Movimentação
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Histórico de Movimentações (Direita) -->
+                        <div class="w-full lg:w-3/5 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col space-y-4">
+                            <h3 class="text-lg font-bold text-slate-800">Histórico Completo de Movimentações</h3>
+                            
+                            <div class="overflow-x-auto scroll-custom border border-slate-100 rounded-xl flex-1 max-h-[500px]">
+                                <table class="w-full text-left border-collapse">
+                                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                                        <tr>
+                                            <th class="py-3 px-4">Data/Hora</th>
+                                            <th class="py-3 px-4">Medicamento</th>
+                                            <th class="py-3 px-4 text-center">Tipo</th>
+                                            <th class="py-3 px-4 text-center">Quant.</th>
+                                            <th class="py-3 px-4">Paciente Vinculado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mov-table-body" class="divide-y divide-slate-100 text-xs text-slate-700">
+                                        <!-- Dinâmico -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- TELA: PACIENTES -->
+                <section id="tab-pacientes" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col lg:flex-row gap-6">
+
+                        <!-- Cadastro de Paciente (Esquerda) -->
+                        <div class="w-full lg:w-2/5 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-fit space-y-5">
+                            <h3 class="text-lg font-bold text-slate-800" id="paciente-form-title">
+                                <i class="fa-solid fa-user-plus text-cyan-500 mr-2"></i>Cadastrar Paciente
+                            </h3>
+                            <form id="paciente-form" class="space-y-4">
+                                <input type="hidden" id="paciente-edit-id">
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome Completo *</label>
+                                    <input type="text" id="pac-nome" required placeholder="Nome Completo do Paciente" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Diagnóstico *</label>
+                                        <input type="text" id="pac-diagnostico" required placeholder="Ex: Diabetes Tipo 2" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Limitações / Cuidados</label>
+                                        <input type="text" id="pac-limitacoes" placeholder="Ex: Cadeirante, Alergias" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                                    <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center">
+                                        <i class="fa-solid fa-people-roof mr-1.5 text-slate-500"></i> Contato Familiar (Emergência)
+                                    </h4>
+                                    
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 mb-1">Nome do Familiar *</label>
+                                        <input type="text" id="pac-familiar-nome" required placeholder="Nome do Responsável" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Telefone Familiar *</label>
+                                            <input type="text" id="pac-familiar-fone" required placeholder="(XX) XXXXX-XXXX" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Endereço Familiar *</label>
+                                            <input type="text" id="pac-familiar-endereco" required placeholder="Rua, Número, Bairro" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-white">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex space-x-2">
+                                    <button type="button" onclick="resetPacienteForm()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2.5 rounded-xl transition">Limpar</button>
+                                    <button type="submit" id="btn-salvar-paciente" class="w-2/3 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2.5 rounded-xl transition">Salvar Paciente</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Listagem de Pacientes (Direita) -->
+                        <div class="w-full lg:w-3/5 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                            <h3 class="text-lg font-bold text-slate-800">Prontuário Rápido de Pacientes</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto scroll-custom max-h-[500px] pr-1" id="pacientes-grid">
+                                <!-- Dinâmico em forma de Cards Expandidos para dados detalhados -->
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- TELA: ALERTAS -->
+                <section id="tab-alertas" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center justify-between">
+                            <span><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Central de Alertas Inteligentes</span>
+                            <span class="text-xs text-slate-500" id="total-alertas-texto">0 alertas identificados</span>
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Alerta de Estoque Baixo -->
+                            <div class="bg-red-50/50 rounded-2xl p-5 border border-red-100 flex flex-col h-[400px]">
+                                <div class="flex items-center space-x-2 text-red-700 font-bold mb-3">
+                                    <i class="fa-solid fa-cubes-stacked"></i>
+                                    <h4>Estoque Baixo (< Mínimo)</h4>
+                                </div>
+                                <div class="flex-1 overflow-y-auto scroll-custom space-y-2" id="alertas-estoque-lista">
+                                    <!-- Dinâmico -->
+                                </div>
+                            </div>
+
+                            <!-- Alerta Próximo ao Vencimento -->
+                            <div class="bg-amber-50/50 rounded-2xl p-5 border border-amber-100 flex flex-col h-[400px]">
+                                <div class="flex items-center space-x-2 text-amber-700 font-bold mb-3">
+                                    <i class="fa-solid fa-hourglass-half"></i>
+                                    <h4>Próximos do Vencimento (< 30 dias)</h4>
+                                </div>
+                                <div class="flex-1 overflow-y-auto scroll-custom space-y-2" id="alertas-validade-lista">
+                                    <!-- Dinâmico -->
+                                </div>
+                            </div>
+
+                            <!-- Alerta Item Vencido -->
+                            <div class="bg-rose-100/40 rounded-2xl p-5 border border-rose-200 flex flex-col h-[400px]">
+                                <div class="flex items-center space-x-2 text-rose-800 font-bold mb-3">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                    <h4>Itens Vencidos</h4>
+                                </div>
+                                <div class="flex-1 overflow-y-auto scroll-custom space-y-2" id="alertas-vencidos-lista">
+                                    <!-- Dinâmico -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TELA: RELATÓRIOS -->
+                <section id="tab-relatorios" class="tab-content hidden space-y-6">
+                    <!-- Painel de Relatório Geral -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-4 gap-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">Relatório Geral Consolidador</h3>
+                                <p class="text-slate-500 text-xs">Visão geral da integridade do estoque e criticidades</p>
+                            </div>
+                            <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-950 text-white font-medium px-4 py-2 rounded-xl text-sm transition flex items-center space-x-2">
+                                <i class="fa-solid fa-print"></i>
+                                <span>Exportar / Imprimir</span>
+                            </button>
+                        </div>
+
+                        <!-- Informações Críticas do Relatório -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            
+                            <!-- Resumo dos Itens Críticos -->
+                            <div class="bg-slate-50 p-5 rounded-xl border border-slate-100 space-y-3">
+                                <h4 class="text-sm font-bold text-red-700 uppercase"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Itens Críticos Demandando Ação</h4>
+                                <ul class="divide-y divide-slate-200/60 text-xs text-slate-700 max-h-[180px] overflow-y-auto scroll-custom space-y-2 pr-1" id="rep-itens-criticos">
+                                    <!-- Dinâmico -->
+                                </ul>
+                            </div>
+
+                            <!-- Divisão por Categoria -->
+                            <div class="bg-slate-50 p-5 rounded-xl border border-slate-100 space-y-3">
+                                <h4 class="text-sm font-bold text-slate-700 uppercase"><i class="fa-solid fa-layer-group mr-1.5"></i>Status Físico por Categoria</h4>
+                                <div class="space-y-2 text-xs text-slate-700 max-h-[180px] overflow-y-auto scroll-custom" id="rep-categorias">
+                                    <!-- Dinâmico -->
+                                </div>
+                            </div>
+
+                            <!-- Resumo de Auditoria Rápida -->
+                            <div class="bg-slate-50 p-5 rounded-xl border border-slate-100 space-y-2">
+                                <h4 class="text-sm font-bold text-cyan-800 uppercase"><i class="fa-solid fa-clipboard-check mr-1.5"></i>Auditoria do Sistema</h4>
+                                <div class="space-y-2 text-xs text-slate-700">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Total de Entradas registradas:</span>
+                                        <span class="font-bold text-slate-800" id="rep-tot-entradas">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Total de Saídas registradas:</span>
+                                        <span class="font-bold text-slate-800" id="rep-tot-saidas">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Total Volumétrico em Estoque:</span>
+                                        <span class="font-bold text-slate-800" id="rep-vol-total">0 un.</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Taxa de Ocupação Crítica:</span>
+                                        <span class="font-bold text-red-600" id="rep-taxa-critica">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Tabela Geral de Estoque para Impressão -->
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-bold text-slate-800">Tabela de Balanço de Estoque</h4>
+                            <div class="overflow-x-auto scroll-custom border border-slate-150 rounded-xl">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead class="bg-slate-100 text-slate-600 uppercase font-semibold">
+                                        <tr>
+                                            <th class="py-3 px-4">Medicamento</th>
+                                            <th class="py-3 px-4">Categoria</th>
+                                            <th class="py-3 px-4">Lote</th>
+                                            <th class="py-3 px-4 text-center">Mínimo</th>
+                                            <th class="py-3 px-4 text-center">Atual</th>
+                                            <th class="py-3 px-4">Validade</th>
+                                            <th class="py-3 px-4 text-center">Status Clínico</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rep-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                        <!-- Dinâmico -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </section>
 
@@ -304,413 +687,996 @@
         </main>
     </div>
 
-    <!-- MODAL MEDICAMENTO -->
-    <div id="modal-medicamento" class="fixed inset-0 bg-black bg-opacity-50 z-[200] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-xl">
-            <div class="p-6 border-b flex justify-between items-center">
-                <h3 class="text-xl font-bold">Cadastro de Medicamento</h3>
-                <button onclick="toggleModal('modal-medicamento')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <form id="form-med" onsubmit="saveMedicine(event)" class="p-6 grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                    <label class="block text-sm font-medium mb-1">Nome do Medicamento</label>
-                    <input type="text" id="med-name" class="w-full p-2 border rounded-lg" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Categoria</label>
-                    <select id="med-category" class="w-full p-2 border rounded-lg">
-                        <option value="Analgésico">Analgésico</option>
-                        <option value="Antibiótico">Antibiótico</option>
-                        <option value="Anti-inflamatório">Anti-inflamatório</option>
-                        <option value="Hipotensor">Hipotensor</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Lote</label>
-                    <input type="text" id="med-lot" class="w-full p-2 border rounded-lg" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Quantidade Inicial</label>
-                    <input type="number" id="med-qty" class="w-full p-2 border rounded-lg" required min="0">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Estoque Mínimo</label>
-                    <input type="number" id="med-min" class="w-full p-2 border rounded-lg" required min="1">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Data de Validade</label>
-                    <input type="date" id="med-expiry" class="w-full p-2 border rounded-lg" required>
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-sm font-medium mb-1">Observações</label>
-                    <textarea id="med-obs" rows="3" class="w-full p-2 border rounded-lg"></textarea>
-                </div>
-                <div class="col-span-2 pt-4 flex gap-3">
-                    <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-lg">Salvar Medicamento</button>
-                    <button type="button" onclick="toggleModal('modal-medicamento')" class="flex-1 bg-gray-100 text-gray-700 font-bold py-2 rounded-lg">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL PACIENTE -->
-    <div id="modal-paciente" class="fixed inset-0 bg-black bg-opacity-50 z-[200] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-y-auto max-h-[90vh]">
-            <div class="p-6 border-b flex justify-between items-center">
-                <h3 class="text-xl font-bold">Cadastro de Paciente</h3>
-                <button onclick="toggleModal('modal-paciente')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <form id="form-patient" onsubmit="savePatient(event)" class="p-6 space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2">
-                        <label class="block text-sm font-medium mb-1">Nome Completo</label>
-                        <input type="text" id="pat-name" class="w-full p-2 border rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Data de Nascimento</label>
-                        <input type="date" id="pat-dob" class="w-full p-2 border rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Diagnóstico Primário</label>
-                        <input type="text" id="pat-diag" class="w-full p-2 border rounded-lg" required>
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-sm font-medium mb-1">Limitações / Alergias</label>
-                        <input type="text" id="pat-limits" class="w-full p-2 border rounded-lg" placeholder="Cadeira de rodas, Alergia a Dipirona, etc.">
-                    </div>
-                </div>
-
-                <div class="border-t pt-4">
-                    <h4 class="font-bold text-gray-700 mb-3">Dados do Familiar/Responsável</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="block text-sm font-medium mb-1">Nome do Familiar</label>
-                            <input type="text" id="pat-fam-name" class="w-full p-2 border rounded-lg" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Telefone</label>
-                            <input type="tel" id="pat-fam-phone" class="w-full p-2 border rounded-lg" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Endereço</label>
-                            <input type="text" id="pat-fam-address" class="w-full p-2 border rounded-lg">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-4 flex gap-3">
-                    <button type="submit" class="flex-1 bg-green-600 text-white font-bold py-2 rounded-lg">Salvar Paciente</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Script Principal -->
+    <!-- SCRIPT DO SISTEMA -->
     <script>
-        // ESTADO GLOBAL (Simulando Banco de Dados)
-        let state = {
-            medicines: [
-                { id: 1, name: 'Paracetamol', category: 'Analgésico', lot: 'LOT123', qty: 15, min: 20, expiry: '2024-05-10', obs: 'Uso comum' },
-                { id: 2, name: 'Amoxicilina', category: 'Antibiótico', lot: 'LOT456', qty: 50, min: 10, expiry: '2025-12-01', obs: 'Requer receita' },
-                { id: 3, name: 'Dipirona', category: 'Analgésico', lot: 'LOT789', qty: 5, min: 10, expiry: '2024-03-20', obs: 'Controlado' }
-            ],
-            patients: [
-                { id: 1, name: 'João Silva', dob: '1950-05-15', diagnosis: 'Hipertensão', limits: 'Nenhuma', famName: 'Maria Silva', famPhone: '(11) 98888-7777', famAddr: 'Rua das Flores, 123' }
-            ],
-            history: []
+        // ESTADO GLOBAL DO SISTEMA (Carrega dados fictícios iniciais ou busca do LocalStorage)
+        let medicamentos = [];
+        let pacientes = [];
+        let movimentacoes = [];
+        let currentUser = null;
+
+        // Dados Iniciais Fictícios para Carregamento Prévio
+        const mockMedicamentos = [
+            { id: "1", nome: "Dipirona Monoidratada 500mg", categoria: "Analgésico", lote: "L-DIP302", quantidade: 14, estoqueMinimo: 30, validade: "2026-08-15", observacoes: "Conservar em temperatura ambiente." },
+            { id: "2", nome: "Amoxicilina 500mg", categoria: "Antibiótico", lote: "L-AMX411", quantidade: 80, estoqueMinimo: 15, validade: "2026-06-20", observacoes: "Uso restrito sob prescrição médica." },
+            { id: "3", nome: "Ibuprofeno 600mg", categoria: "Anti-inflamatório", lote: "L-IBU090", quantidade: 5, estoqueMinimo: 10, validade: "2025-12-01", observacoes: "Tomar preferencialmente após as refeições." },
+            { id: "4", nome: "Paracetamol 750mg", categoria: "Analgésico", lote: "L-PAR77", quantidade: 120, estoqueMinimo: 20, validade: "2027-10-10", observacoes: "Não exceder 4g diários." }
+        ];
+
+        const mockPacientes = [
+            { 
+                id: "1", 
+                nome: "Carlos Eduardo da Silva", 
+                diagnostico: "Hipertensão e Dor Crônica", 
+                limitacoes: "Dificuldade de locomoção", 
+                familiarNome: "Marcia da Silva", 
+                familiarFone: "(11) 98765-4321", 
+                familiarEndereco: "Av. Paulista, 1000 - Ap 42, São Paulo - SP" 
+            },
+            { 
+                id: "2", 
+                nome: "Ana Julia Rodrigues", 
+                diagnostico: "Infecção de Garganta Bacteriana", 
+                limitacoes: "Nenhuma limitação relatada", 
+                familiarNome: "Roberto Rodrigues", 
+                familiarFone: "(11) 97654-3210", 
+                familiarEndereco: "Rua das Flores, 45, São Caetano - SP" 
+            }
+        ];
+
+        const mockMovimentacoes = [
+            { id: "1", data: "2026-05-18T10:30:00", medicamentoId: "1", quantidade: 10, tipo: "ENTRADA", pacienteVinculado: null },
+            { id: "2", data: "2026-05-18T14:15:00", medicamentoId: "2", quantidade: 20, tipo: "SAIDA", pacienteVinculado: { nome: "Ana Julia Rodrigues", diagnostico: "Infecção de Garganta Bacteriana", quantidadeDosagem: "1 comprimido", periodoAdministracao: "A cada 8 horas", periodoPropostoUso: "7 dias" } }
+        ];
+
+        // INICIALIZAÇÃO DO APP
+        window.onload = function() {
+            // Inicializar Data no Header
+            const hoje = new Date();
+            document.getElementById('current-date').innerText = hoje.toLocaleDateString('pt-BR');
+
+            // Carregar dados de persistência local ou iniciar mocks
+            if (localStorage.getItem('medstock_medicamentos')) {
+                medicamentos = JSON.parse(localStorage.getItem('medstock_medicamentos'));
+            } else {
+                medicamentos = mockMedicamentos;
+                saveToLocalStorage('medstock_medicamentos', medicamentos);
+            }
+
+            if (localStorage.getItem('medstock_pacientes')) {
+                pacientes = JSON.parse(localStorage.getItem('medstock_pacientes'));
+            } else {
+                pacientes = mockPacientes;
+                saveToLocalStorage('medstock_pacientes', pacientes);
+            }
+
+            if (localStorage.getItem('medstock_movimentacoes')) {
+                movimentacoes = JSON.parse(localStorage.getItem('medstock_movimentacoes'));
+            } else {
+                movimentacoes = mockMovimentacoes;
+                saveToLocalStorage('medstock_movimentacoes', movimentacoes);
+            }
+
+            // Verificar se o usuário já estava logado nesta sessão
+            const sessionUser = sessionStorage.getItem('medstock_user');
+            if (sessionUser) {
+                currentUser = JSON.parse(sessionUser);
+                startSystem();
+            }
+
+            // Ouvinte do formulário de Login
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+
+            // Ouvintes de formulários normais
+            document.getElementById('med-form').addEventListener('submit', saveMedicamento);
+            document.getElementById('mov-form').addEventListener('submit', saveMovimentacao);
+            document.getElementById('paciente-form').addEventListener('submit', savePaciente);
         };
 
-        // LOGIN / LOGOUT
+        // CONTROLE DE ACESSO (LOGIN & LOGOUT)
         function handleLogin(e) {
             e.preventDefault();
-            const user = document.getElementById('username').value;
-            if(user) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('current-user-display').innerText = user;
-                initApp();
-            }
-        }
+            const userIn = document.getElementById('username').value.trim().toLowerCase();
+            const passIn = document.getElementById('password').value;
+            const roleIn = document.getElementById('user-role').value;
 
-        function handleLogout() {
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('main-app').classList.add('hidden');
-        }
-
-        // NAVEGAÇÃO
-        function showSection(sectionId) {
-            const sections = ['dashboard', 'medicamentos', 'pacientes', 'movimentacao', 'relatorios'];
-            sections.forEach(s => {
-                document.getElementById(`${s}-section`).classList.add('hidden');
-            });
-            document.getElementById(`${sectionId}-section`).classList.remove('hidden');
-            
-            // UI Active State
-            const btns = document.querySelectorAll('.sidebar-item');
-            btns.forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            
-            // Title
-            document.getElementById('section-title').innerText = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
-            
-            updateUI();
-        }
-
-        // MODAIS
-        function toggleModal(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('hidden');
-        }
-
-        // CRUD MEDICAMENTOS
-        function saveMedicine(e) {
-            e.preventDefault();
-            const newMed = {
-                id: Date.now(),
-                name: document.getElementById('med-name').value,
-                category: document.getElementById('med-category').value,
-                lot: document.getElementById('med-lot').value,
-                qty: parseInt(document.getElementById('med-qty').value),
-                min: parseInt(document.getElementById('med-min').value),
-                expiry: document.getElementById('med-expiry').value,
-                obs: document.getElementById('med-obs').value
-            };
-            state.medicines.push(newMed);
-            addHistory('CADASTRO', `Cadastrou item: ${newMed.name}`, newMed.qty);
-            document.getElementById('form-med').reset();
-            toggleModal('modal-medicamento');
-            updateUI();
-        }
-
-        // CRUD PACIENTES
-        function savePatient(e) {
-            e.preventDefault();
-            const newPat = {
-                id: Date.now(),
-                name: document.getElementById('pat-name').value,
-                dob: document.getElementById('pat-dob').value,
-                diagnosis: document.getElementById('pat-diag').value,
-                limits: document.getElementById('pat-limits').value,
-                famName: document.getElementById('pat-fam-name').value,
-                famPhone: document.getElementById('pat-fam-phone').value,
-                famAddr: document.getElementById('pat-fam-address').value
-            };
-            state.patients.push(newPat);
-            addHistory('PACIENTE', `Cadastrou paciente: ${newPat.name}`, '-');
-            document.getElementById('form-patient').reset();
-            toggleModal('modal-paciente');
-            updateUI();
-        }
-
-        // MOVIMENTAÇÕES
-        function handleMovement(e, type) {
-            e.preventDefault();
-            let medId, qty, patientId = null, period = "";
-            
-            if(type === 'IN') {
-                medId = document.getElementById('mov-in-med').value;
-                qty = parseInt(document.getElementById('mov-in-qty').value);
+            // Autenticação simples exigida nos critérios de segurança (login direto com nível de acesso)
+            if ((userIn === 'admin' && passIn !== '') || (userIn === 'operador' && passIn !== '')) {
+                currentUser = {
+                    username: userIn === 'admin' ? 'Administrador Central' : 'Operador Técnico',
+                    role: userIn === 'admin' ? 'Administrador' : roleIn
+                };
+                sessionStorage.setItem('medstock_user', JSON.stringify(currentUser));
+                document.getElementById('login-error').classList.add('hidden');
+                startSystem();
+                showToast("Bem-vindo ao MedStock!", "success");
             } else {
-                medId = document.getElementById('mov-out-med').value;
-                qty = parseInt(document.getElementById('mov-out-qty').value);
-                patientId = document.getElementById('mov-out-patient').value;
-                period = document.getElementById('mov-out-period').value;
+                const errDiv = document.getElementById('login-error');
+                errDiv.classList.remove('hidden');
+            }
+        }
+
+        function startSystem() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            // Configurar dados do usuário logado na interface
+            document.getElementById('logged-username').innerText = currentUser.username;
+            document.getElementById('logged-role').innerText = currentUser.role;
+            document.getElementById('user-avatar').innerText = currentUser.username.substring(0, 2).toUpperCase();
+
+            // Restrição de Acesso para Perfil Operador
+            if (currentUser.role === 'Operador') {
+                // Esconder botão de edição/exclusão se houver na listagem
+                // O operador pode registrar movimentações e ver relatórios, mas não gerenciar estruturas críticas
+                document.getElementById('btn-salvar-med').innerText = "Solicitar Autorização de Cadastro";
+                document.getElementById('btn-salvar-med').disabled = true;
+                document.getElementById('btn-salvar-med').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('med-form-title').innerHTML = "<i class='fa-solid fa-lock text-red-500 mr-2'></i>Cadastro Restrito (Admin)";
+            } else {
+                document.getElementById('btn-salvar-med').innerText = "Salvar";
+                document.getElementById('btn-salvar-med').disabled = false;
+                document.getElementById('btn-salvar-med').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('med-form-title').innerHTML = "<i class='fa-solid fa-plus-circle text-cyan-500 mr-2'></i>Cadastrar Medicamento";
             }
 
-            const medIndex = state.medicines.findIndex(m => m.id == medId);
-            if(medIndex === -1) return;
+            // Renderizar dados iniciais de todas as telas
+            refreshSystemData();
+            switchTab('dashboard');
+        }
 
-            if(type === 'OUT' && state.medicines[medIndex].qty < qty) {
-                alertCustom("Estoque insuficiente para esta saída!");
+        function logout() {
+            sessionStorage.removeItem('medstock_user');
+            currentUser = null;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // SALVAR DADOS NO LOCAL STORAGE
+        function saveToLocalStorage(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        // CONTROLE DE NAVEGAÇÃO ENTRE ABAS
+        function switchTab(tabName) {
+            // Esconder todas as abas
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+
+            // Remover classe active de todos os links do menu lateral
+            const links = document.querySelectorAll('.tab-link');
+            links.forEach(link => link.classList.remove('active', 'bg-slate-800', 'text-white'));
+
+            // Mostrar a aba selecionada
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            // Setar título na topbar
+            const titles = {
+                'dashboard': 'Dashboard Clínico',
+                'medicamentos': 'Gerenciamento de Medicamentos',
+                'movimentacoes': 'Movimentação de Estoque',
+                'pacientes': 'Prontuário de Pacientes',
+                'alertas': 'Central de Alertas',
+                'relatorios': 'Relatórios Consolidados'
+            };
+            document.getElementById('current-page-title').innerText = titles[tabName] || 'MedStock';
+
+            // Encontrar o botão correspondente e destacar
+            links.forEach(link => {
+                if (link.getAttribute('onclick').includes(tabName)) {
+                    link.classList.add('active', 'bg-slate-800', 'text-white');
+                }
+            });
+
+            // Atualizar os dados específicos da aba aberta
+            refreshSystemData();
+        }
+
+        // ATUALIZAÇÃO RECORRENTE DOS DADOS DO SISTEMA
+        function refreshSystemData() {
+            calculateAlerts();
+            renderDashboard();
+            renderMedicamentos();
+            renderMovimentacoes();
+            renderPacientes();
+            renderRelatorios();
+            populateSelects();
+        }
+
+        // TELA 1: CADASTRO E INVENTÁRIO DE MEDICAMENTOS
+        function renderMedicamentos() {
+            const tbody = document.getElementById('med-table-body');
+            const searchVal = document.getElementById('inventory-search').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = medicamentos.filter(m => m.nome.toLowerCase().includes(searchVal));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">Nenhum medicamento localizado.</td></tr>`;
                 return;
             }
 
-            if(type === 'IN') {
-                state.medicines[medIndex].qty += qty;
-                addHistory('ENTRADA', `Entrada de ${state.medicines[medIndex].name}`, qty);
-            } else {
-                state.medicines[medIndex].qty -= qty;
-                const patient = state.patients.find(p => p.id == patientId);
-                addHistory('SAÍDA', `Saída para ${patient.name} (${state.medicines[medIndex].name})`, qty);
-            }
+            filtered.forEach(m => {
+                const isCritico = m.quantidade <= m.estoqueMinimo;
+                const isVencido = isExpired(m.validade);
+                const isQuaseVencido = isExpiringSoon(m.validade);
 
-            e.target.reset();
-            updateUI();
-        }
+                let statusBadge = '<span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">Ok</span>';
+                if (isVencido) {
+                    statusBadge = '<span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full">Vencido</span>';
+                } else if (isQuaseVencido) {
+                    statusBadge = '<span class="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full">Prox. Venc.</span>';
+                } else if (isCritico) {
+                    statusBadge = '<span class="px-2 py-1 bg-rose-100 text-rose-800 text-xs font-semibold rounded-full">Estoque Baixo</span>';
+                }
 
-        // AUXILIARES DE HISTÓRICO E ALERTAS
-        function addHistory(type, desc, qty) {
-            state.history.unshift({
-                date: new Date().toLocaleString('pt-BR'),
-                type,
-                desc,
-                qty
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition duration-150">
+                        <td class="py-3.5 px-4 font-semibold text-slate-900">
+                            ${m.nome}
+                            <div class="text-slate-400 font-normal text-xs truncate max-w-xs">${m.observacoes || 'Sem observações'}</div>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="text-xs font-medium text-slate-500">${m.categoria}</span>
+                            <div class="text-[10px] font-mono text-slate-400">Lote: ${m.lote}</div>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="font-bold text-slate-800">${m.quantidade}</span>
+                            <div class="text-[10px] text-slate-400">mín: ${m.estoqueMinimo}</div>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="text-xs ${isVencido ? 'text-red-600 font-semibold' : ''}">${formatDate(m.validade)}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">${statusBadge}</td>
+                        <td class="py-3.5 px-4 text-right space-x-1">
+                            <button onclick="editMedicamento('${m.id}')" class="text-slate-500 hover:text-cyan-600 p-1.5 transition" title="Editar">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteMedicamento('${m.id}')" class="text-slate-500 hover:text-red-600 p-1.5 transition" title="Excluir">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
             });
         }
 
-        function alertCustom(msg) {
-            // Alternativa simples ao alert()
-            const div = document.createElement('div');
-            div.className = "fixed bottom-5 right-5 bg-red-600 text-white p-4 rounded-lg shadow-lg z-[300] transform transition-all animate-bounce";
-            div.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i> ${msg}`;
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 4000);
+        function saveMedicamento(e) {
+            e.preventDefault();
+            
+            if (currentUser.role === 'Operador') {
+                showToast("Operadores não podem alterar o inventário estrutural.", "error");
+                return;
+            }
+
+            const id = document.getElementById('med-edit-id').value;
+            const nome = document.getElementById('med-nome').value.trim();
+            const categoria = document.getElementById('med-categoria').value;
+            const lote = document.getElementById('med-lote').value.trim();
+            const quantidade = parseInt(document.getElementById('med-quantidade').value);
+            const estoqueMinimo = parseInt(document.getElementById('med-estoque-minimo').value);
+            const validade = document.getElementById('med-validade').value;
+            const observacoes = document.getElementById('med-observacoes').value.trim();
+
+            if (id) {
+                // Editar existente
+                const index = medicamentos.findIndex(m => m.id === id);
+                if (index !== -1) {
+                    medicamentos[index] = { ...medicamentos[index], nome, categoria, lote, quantidade, estoqueMinimo, validade, observacoes };
+                    showToast("Medicamento atualizado com sucesso!", "success");
+                }
+            } else {
+                // Adicionar novo
+                const novo = {
+                    id: Date.now().toString(),
+                    nome, categoria, lote, quantidade, estoqueMinimo, validade, observacoes
+                };
+                medicamentos.push(novo);
+                showToast("Medicamento cadastrado com sucesso!", "success");
+            }
+
+            saveToLocalStorage('medstock_medicamentos', medicamentos);
+            resetMedForm();
+            refreshSystemData();
         }
 
-        // UPDATE UI ENGINE
-        function updateUI() {
-            // Render Lists
-            renderMedicines();
-            renderPatients();
-            renderDashboard();
-            renderDropdowns();
-            renderHistory();
+        function editMedicamento(id) {
+            if (currentUser.role === 'Operador') {
+                showToast("Permissão negada. Apenas Administradores.", "error");
+                return;
+            }
+
+            const med = medicamentos.find(m => m.id === id);
+            if (!med) return;
+
+            document.getElementById('med-edit-id').value = med.id;
+            document.getElementById('med-nome').value = med.nome;
+            document.getElementById('med-categoria').value = med.categoria;
+            document.getElementById('med-lote').value = med.lote;
+            document.getElementById('med-quantidade').value = med.quantidade;
+            document.getElementById('med-estoque-minimo').value = med.estoqueMinimo;
+            document.getElementById('med-validade').value = med.validade;
+            document.getElementById('med-observacoes').value = med.observacoes;
+
+            document.getElementById('btn-salvar-med').innerText = "Atualizar Cadastro";
         }
 
-        function renderMedicines() {
-            const body = document.getElementById('meds-list-body');
-            body.innerHTML = '';
-            state.medicines.forEach(m => {
-                const isExpired = new Date(m.expiry) < new Date();
-                const isLow = m.qty <= m.min;
+        function deleteMedicamento(id) {
+            if (currentUser.role === 'Operador') {
+                showToast("Apenas Administradores podem excluir itens.", "error");
+                return;
+            }
+
+            const confirmAction = confirm("Tem certeza de que deseja remover permanentemente este medicamento do estoque?");
+            if (confirmAction) {
+                medicamentos = medicamentos.filter(m => m.id !== id);
+                saveToLocalStorage('medstock_medicamentos', medicamentos);
+                showToast("Medicamento excluído do sistema.", "success");
+                refreshSystemData();
+            }
+        }
+
+        function resetMedForm() {
+            document.getElementById('med-form').reset();
+            document.getElementById('med-edit-id').value = '';
+            document.getElementById('btn-salvar-med').innerText = "Salvar";
+        }
+
+        // TELA 2: CONTROLE DE MOVIMENTAÇÕES DE ESTOQUE
+        let currentMovType = 'ENTRADA';
+
+        function setMovType(type) {
+            currentMovType = type;
+            document.getElementById('mov-tipo').value = type;
+
+            const btnEntrada = document.getElementById('btn-type-entrada');
+            const btnSaida = document.getElementById('btn-type-saida');
+            const pacienteSection = document.getElementById('mov-paciente-section');
+            const dosagemGroup = document.getElementById('saida-dosagem-group');
+
+            if (type === 'ENTRADA') {
+                btnEntrada.className = "py-2 text-center rounded-lg font-bold text-sm bg-white text-emerald-600 shadow-sm transition";
+                btnSaida.className = "py-2 text-center rounded-lg font-bold text-sm text-slate-600 hover:text-slate-900 transition";
+                pacienteSection.classList.add('hidden');
+                dosagemGroup.classList.add('hidden');
                 
-                body.innerHTML += `
-                    <tr>
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-gray-900">${m.name}</div>
-                            <div class="text-xs text-gray-400">Lote: ${m.lot}</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">${m.category}</td>
-                        <td class="px-6 py-4">
-                            <span class="font-bold ${isLow ? 'text-red-600' : 'text-gray-700'}">${m.qty}</span> 
-                            <span class="text-xs text-gray-400">/ ${m.min}</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="status-badge ${isExpired ? 'alert-critical' : 'alert-success'}">${m.expiry}</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <button onclick="deleteMed(${m.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function renderPatients() {
-            const body = document.getElementById('patients-list-body');
-            body.innerHTML = '';
-            state.patients.forEach(p => {
-                body.innerHTML += `
-                    <tr>
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-gray-900">${p.name}</div>
-                            <div class="text-xs text-gray-400">Nasc: ${p.dob}</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">${p.diagnosis}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">${p.famName}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">${p.famPhone}</td>
-                        <td class="px-6 py-4">
-                            <button class="text-blue-400 hover:text-blue-600"><i class="fas fa-info-circle"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function renderDashboard() {
-            const today = new Date();
-            const nextWeek = new Date(); nextWeek.setDate(today.getDate() + 15);
-            
-            const lowStock = state.medicines.filter(m => m.qty <= m.min);
-            const expired = state.medicines.filter(m => new Date(m.expiry) < today);
-            const nearExp = state.medicines.filter(m => {
-                const expDate = new Date(m.expiry);
-                return expDate > today && expDate < nextWeek;
-            });
-
-            document.getElementById('dash-total-meds').innerText = state.medicines.length;
-            document.getElementById('dash-low-stock').innerText = lowStock.length;
-            document.getElementById('dash-near-exp').innerText = nearExp.length;
-            document.getElementById('dash-expired').innerText = expired.length;
-
-            // Render Alerts
-            const container = document.getElementById('alerts-container');
-            container.innerHTML = '';
-            
-            expired.forEach(m => {
-                container.innerHTML += `<div class="p-3 alert-critical rounded-lg text-sm flex justify-between"><span>VENCIDO: ${m.name}</span> <i class="fas fa-skull"></i></div>`;
-            });
-            lowStock.forEach(m => {
-                container.innerHTML += `<div class="p-3 alert-warning rounded-lg text-sm flex justify-between"><span>ESTOQUE BAIXO: ${m.name}</span> <span>${m.qty} unid.</span></div>`;
-            });
-
-            const totalAlerts = expired.length + lowStock.length + nearExp.length;
-            const badge = document.getElementById('alert-badge');
-            if(totalAlerts > 0) {
-                badge.innerText = totalAlerts;
-                badge.classList.remove('hidden');
+                // Remover campos obrigatórios de paciente
+                setPacienteFieldsRequired(false);
             } else {
-                badge.classList.add('hidden');
+                btnSaida.className = "py-2 text-center rounded-lg font-bold text-sm bg-white text-rose-600 shadow-sm transition";
+                btnEntrada.className = "py-2 text-center rounded-lg font-bold text-sm text-slate-600 hover:text-slate-900 transition";
+                pacienteSection.classList.remove('hidden');
+                dosagemGroup.classList.remove('hidden');
+                
+                // Tornar campos obrigatórios de paciente ativos
+                setPacienteFieldsRequired(true);
             }
         }
 
-        function renderDropdowns() {
-            const medIn = document.getElementById('mov-in-med');
-            const medOut = document.getElementById('mov-out-med');
-            const patOut = document.getElementById('mov-out-patient');
-
-            const medOptions = state.medicines.map(m => `<option value="${m.id}">${m.name} (Lote: ${m.lot})</option>`).join('');
-            const patOptions = state.patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-
-            medIn.innerHTML = medOptions;
-            medOut.innerHTML = medOptions;
-            patOut.innerHTML = patOptions;
+        function setPacienteFieldsRequired(req) {
+            document.getElementById('mov-paciente-nome').required = req;
+            document.getElementById('mov-paciente-nascimento').required = req;
+            document.getElementById('mov-paciente-diagnostico').required = req;
+            document.getElementById('mov-paciente-periodo').required = req;
+            document.getElementById('mov-paciente-administracao').required = req;
+            document.getElementById('mov-dosagem').required = req;
         }
 
-        function renderHistory() {
-            const dashHist = document.getElementById('recent-history');
-            const fullHist = document.getElementById('full-history-body');
+        function autofillPatientData() {
+            const select = document.getElementById('mov-paciente-id');
+            const pId = select.value;
+            if (!pId) {
+                document.getElementById('mov-paciente-nome').value = '';
+                document.getElementById('mov-paciente-diagnostico').value = '';
+                return;
+            }
+
+            const p = pacientes.find(item => item.id === pId);
+            if (p) {
+                document.getElementById('mov-paciente-nome').value = p.nome;
+                document.getElementById('mov-paciente-diagnostico').value = p.diagnostico;
+            }
+        }
+
+        function saveMovimentacao(e) {
+            e.preventDefault();
+
+            const medId = document.getElementById('mov-medicamento-id').value;
+            const quantidade = parseInt(document.getElementById('mov-quantidade').value);
+            const tipo = document.getElementById('mov-tipo').value;
+
+            const med = medicamentos.find(m => m.id === medId);
+            if (!med) {
+                showToast("Medicamento inválido selecionado.", "error");
+                return;
+            }
+
+            let pacienteVinculado = null;
+
+            // Validação de Baixa Automática e Coleta de dados do Paciente
+            if (tipo === 'SAIDA') {
+                if (med.quantidade < quantidade) {
+                    showToast(`Erro: Estoque insuficiente! Saldo atual do item: ${med.quantidade} unidades.`, "error");
+                    return;
+                }
+
+                const nomePac = document.getElementById('mov-paciente-nome').value.trim();
+                const nascPac = document.getElementById('mov-paciente-nascimento').value;
+                const diagPac = document.getElementById('mov-paciente-diagnostico').value.trim();
+                const periodoPac = document.getElementById('mov-paciente-periodo').value.trim();
+                const adminPac = document.getElementById('mov-paciente-administracao').value.trim();
+                const dosagemReg = document.getElementById('mov-dosagem').value.trim();
+
+                pacienteVinculado = {
+                    nome: nomePac,
+                    dataNascimento: nascPac,
+                    diagnostico: diagPac,
+                    quantidadeDosagem: dosagemReg,
+                    periodoAdministracao: adminPac,
+                    periodoPropostoUso: periodoPac
+                };
+
+                // Baixa Automática no estoque
+                med.quantidade -= quantidade;
+            } else {
+                // Entrada de estoque incrementa o saldo
+                med.quantidade += quantidade;
+            }
+
+            // Registrar Histórico
+            const novaMov = {
+                id: Date.now().toString(),
+                data: new Date().toISOString(),
+                medicamentoId: medId,
+                quantidade: quantidade,
+                tipo: tipo,
+                pacienteVinculado: pacienteVinculado
+            };
+
+            movimentacoes.push(novaMov);
+
+            // Se o paciente digitado for novo e não houver cadastrado, cadastra opcionalmente para centralizar na área de prontuários
+            if (tipo === 'SAIDA') {
+                const pacienteExiste = pacientes.some(p => p.nome.toLowerCase() === pacienteVinculado.nome.toLowerCase());
+                if (!pacienteExiste) {
+                    const novoP = {
+                        id: Date.now().toString(),
+                        nome: pacienteVinculado.nome,
+                        diagnostico: pacienteVinculado.diagnostico,
+                        limitacoes: "Nenhuma descrita durante a dispensação do lote.",
+                        familiarNome: "Responsável Fictício (Necessita atualização)",
+                        familiarFone: "Não informado",
+                        familiarEndereco: "Não informado"
+                    };
+                    pacientes.push(novoP);
+                    saveToLocalStorage('medstock_pacientes', pacientes);
+                }
+            }
+
+            // Persistir
+            saveToLocalStorage('medstock_medicamentos', medicamentos);
+            saveToLocalStorage('medstock_movimentacoes', movimentacoes);
+
+            showToast(`Movimentação de ${tipo === 'ENTRADA' ? 'Entrada' : 'Saída'} realizada com sucesso! Balanço atualizado.`, "success");
+
+            // Resetar formulário
+            document.getElementById('mov-form').reset();
+            setMovType('ENTRADA');
+            refreshSystemData();
+        }
+
+        function renderMovimentacoes() {
+            const tbody = document.getElementById('mov-table-body');
+            tbody.innerHTML = '';
+
+            // Mostrar mais recentes primeiro
+            const sorted = [...movimentacoes].sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">Nenhuma movimentação realizada.</td></tr>`;
+                return;
+            }
+
+            sorted.forEach(mov => {
+                const med = medicamentos.find(m => m.id === mov.medicamentoId) || { nome: 'Removido', lote: 'Indefinido' };
+                const dt = new Date(mov.data);
+                const formatDt = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                const badge = mov.tipo === 'ENTRADA' 
+                    ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded">ENTRADA</span>' 
+                    : '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 font-bold rounded">SAÍDA</span>';
+
+                let pacInfo = '<span class="text-slate-400">Carga Administrativa</span>';
+                if (mov.tipo === 'SAIDA' && mov.pacienteVinculado) {
+                    pacInfo = `
+                        <div>
+                            <span class="font-semibold text-slate-800">${mov.pacienteVinculado.nome}</span>
+                            <div class="text-[10px] text-slate-500">Dosagem: ${mov.pacienteVinculado.quantidadeDosagem} | Período: ${mov.pacienteVinculado.periodoPropostoUso}</div>
+                        </div>
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100">
+                        <td class="py-3 px-4 text-slate-500 font-mono">${formatDt}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">
+                            ${med.nome}
+                            <span class="block text-[10px] font-mono text-slate-400">Lote: ${med.lote}</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">${badge}</td>
+                        <td class="py-3 px-4 text-center font-bold text-slate-800">${mov.quantidade}</td>
+                        <td class="py-3 px-4">${pacInfo}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // TELA 3: CADASTRO E CONTROLE DE PACIENTES
+        function savePaciente(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('paciente-edit-id').value;
+            const nome = document.getElementById('pac-nome').value.trim();
+            const diagnostico = document.getElementById('pac-diagnostico').value.trim();
+            const limitacoes = document.getElementById('pac-limitacoes').value.trim();
+            const familiarNome = document.getElementById('pac-familiar-nome').value.trim();
+            const familiarFone = document.getElementById('pac-familiar-fone').value.trim();
+            const familiarEndereco = document.getElementById('pac-familiar-endereco').value.trim();
+
+            if (id) {
+                // Editar
+                const index = pacientes.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    pacientes[index] = { id, nome, diagnostico, limitacoes, familiarNome, familiarFone, familiarEndereco };
+                    showToast("Paciente atualizado com sucesso!", "success");
+                }
+            } else {
+                // Adicionar
+                const novo = {
+                    id: Date.now().toString(),
+                    nome, diagnostico, limitacoes, familiarNome, familiarFone, familiarEndereco
+                };
+                pacientes.push(novo);
+                showToast("Paciente cadastrado com sucesso!", "success");
+            }
+
+            saveToLocalStorage('medstock_pacientes', pacientes);
+            resetPacienteForm();
+            refreshSystemData();
+        }
+
+        function editPaciente(id) {
+            const p = pacientes.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('paciente-edit-id').value = p.id;
+            document.getElementById('pac-nome').value = p.nome;
+            document.getElementById('pac-diagnostico').value = p.diagnostico;
+            document.getElementById('pac-limitacoes').value = p.limitacoes;
+            document.getElementById('pac-familiar-nome').value = p.familiarNome;
+            document.getElementById('pac-familiar-fone').value = p.familiarFone;
+            document.getElementById('pac-familiar-endereco').value = p.familiarEndereco;
+
+            document.getElementById('paciente-form-title').innerHTML = "<i class='fa-solid fa-user-pen text-cyan-500 mr-2'></i>Editar Paciente";
+        }
+
+        function deletePaciente(id) {
+            const confirmAction = confirm("Tem certeza de que deseja remover este paciente do sistema?");
+            if (confirmAction) {
+                pacientes = pacientes.filter(p => p.id !== id);
+                saveToLocalStorage('medstock_pacientes', pacientes);
+                showToast("Paciente removido do MedStock.", "success");
+                refreshSystemData();
+            }
+        }
+
+        function resetPacienteForm() {
+            document.getElementById('paciente-form').reset();
+            document.getElementById('paciente-edit-id').value = '';
+            document.getElementById('paciente-form-title').innerHTML = "<i class='fa-solid fa-user-plus text-cyan-500 mr-2'></i>Cadastrar Paciente";
+        }
+
+        function renderPacientes() {
+            const grid = document.getElementById('pacientes-grid');
+            grid.innerHTML = '';
+
+            if (pacientes.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 text-center py-8 text-slate-400">Nenhum paciente cadastrado até o momento.</div>`;
+                return;
+            }
+
+            pacientes.forEach(p => {
+                grid.innerHTML += `
+                    <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 flex flex-col justify-between space-y-3 relative group">
+                        <div>
+                            <div class="flex items-start justify-between">
+                                <h4 class="font-bold text-slate-900 leading-tight">${p.nome}</h4>
+                                <div class="flex space-x-1 opacity-60 hover:opacity-100 transition">
+                                    <button onclick="editPaciente('${p.id}')" class="text-slate-500 hover:text-cyan-600 p-1" title="Editar"><i class="fa-solid fa-edit text-xs"></i></button>
+                                    <button onclick="deletePaciente('${p.id}')" class="text-slate-500 hover:text-red-600 p-1" title="Excluir"><i class="fa-solid fa-trash text-xs"></i></button>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1"><span class="font-semibold text-slate-700">Diagnóstico:</span> ${p.diagnostico}</p>
+                            <p class="text-xs text-slate-500"><span class="font-semibold text-slate-700">Limitações:</span> ${p.limitacoes || 'Sem limitações relatadas'}</p>
+                        </div>
+                        
+                        <div class="pt-2 border-t border-slate-200/60 text-[11px] text-slate-600 space-y-1 bg-slate-100/40 p-2.5 rounded-lg">
+                            <span class="font-bold text-slate-700 uppercase tracking-wide text-[9px] block mb-1"><i class="fa-solid fa-people-roof text-cyan-600 mr-1"></i>Responsável Familiar</span>
+                            <div><span class="font-medium text-slate-500">Nome:</span> ${p.familiarNome}</div>
+                            <div><span class="font-medium text-slate-500">Contato:</span> ${p.familiarFone}</div>
+                            <div class="truncate"><span class="font-medium text-slate-500">Endereço:</span> ${p.familiarEndereco}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // TELA 4: CENTRAL DE ALERTAS INTELIGENTES
+        function calculateAlerts() {
+            const listEstoque = document.getElementById('alertas-estoque-lista');
+            const listValidade = document.getElementById('alertas-validade-lista');
+            const listVencidos = document.getElementById('alertas-vencidos-lista');
+
+            listEstoque.innerHTML = '';
+            listValidade.innerHTML = '';
+            listVencidos.innerHTML = '';
+
+            let countAlerts = 0;
+            let lowCount = 0;
+            let soonCount = 0;
+            let expCount = 0;
+
+            medicamentos.forEach(m => {
+                const isCritico = m.quantidade <= m.estoqueMinimo;
+                const isVencido = isExpired(m.validade);
+                const isQuaseVencido = isExpiringSoon(m.validade);
+
+                if (isVencido) {
+                    expCount++;
+                    countAlerts++;
+                    listVencidos.innerHTML += `
+                        <div class="p-3 bg-red-100 text-red-900 rounded-xl border border-red-200 text-xs">
+                            <div class="font-bold">${m.nome}</div>
+                            <div>Lote: ${m.lote}</div>
+                            <div class="font-semibold mt-1"><i class="fa-solid fa-calendar-times mr-1"></i>Venceu em: ${formatDate(m.validade)}</div>
+                        </div>
+                    `;
+                } else if (isQuaseVencido) {
+                    soonCount++;
+                    countAlerts++;
+                    listValidade.innerHTML += `
+                        <div class="p-3 bg-amber-100 text-amber-950 rounded-xl border border-amber-200 text-xs">
+                            <div class="font-bold">${m.nome}</div>
+                            <div>Lote: ${m.lote} | Saldo: ${m.quantidade}</div>
+                            <div class="font-semibold mt-1"><i class="fa-solid fa-clock mr-1"></i>Vence em: ${formatDate(m.validade)}</div>
+                        </div>
+                    `;
+                }
+
+                if (isCritico) {
+                    lowCount++;
+                    countAlerts++;
+                    listEstoque.innerHTML += `
+                        <div class="p-3 bg-rose-50 text-rose-950 rounded-xl border border-rose-200 text-xs">
+                            <div class="font-bold">${m.nome}</div>
+                            <div>Estoque Mínimo: ${m.estoqueMinimo} | <span class="text-rose-700 font-bold">Saldo Atual: ${m.quantidade}</span></div>
+                            <div class="font-mono text-[10px] text-rose-600 mt-1">Lote de Origem: ${m.lote}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (lowCount === 0) listEstoque.innerHTML = `<p class="text-slate-400 text-center py-6 text-xs">Nenhum alerta de estoque baixo.</p>`;
+            if (soonCount === 0) listValidade.innerHTML = `<p class="text-slate-400 text-center py-6 text-xs">Sem vencimentos próximos.</p>`;
+            if (expCount === 0) listVencidos.innerHTML = `<p class="text-slate-400 text-center py-6 text-xs">Nenhum item vencido em prateleira.</p>`;
+
+            // Atualizar contadores em tela
+            document.getElementById('badge-total-alertas').innerText = countAlerts;
+            if (countAlerts > 0) {
+                document.getElementById('badge-total-alertas').classList.remove('hidden');
+            } else {
+                document.getElementById('badge-total-alertas').classList.add('hidden');
+            }
+            document.getElementById('total-alertas-texto').innerText = `${countAlerts} alertas de riscos ativos identificados`;
+            document.getElementById('alert-critical-count').innerText = `${countAlerts} Pendente(s)`;
+        }
+
+        // TELA 5: DASHBOARD RESUMO
+        function renderDashboard() {
+            // Cards de Métricas
+            document.getElementById('dash-total-itens').innerText = medicamentos.length;
             
-            dashHist.innerHTML = state.history.slice(0, 5).map(h => `
-                <div class="flex items-center justify-between border-b border-gray-50 pb-2">
-                    <span class="${h.type === 'ENTRADA' ? 'text-blue-600' : 'text-red-500'} font-bold text-[10px] uppercase w-16">${h.type}</span>
-                    <span class="flex-1 px-2 text-gray-700 truncate">${h.desc}</span>
-                    <span class="text-gray-400 text-[10px]">${h.date.split(',')[0]}</span>
-                </div>
-            `).join('') || '<p class="text-gray-300 italic">Nenhuma movimentação</p>';
+            // Estoque Crítico
+            const criticos = medicamentos.filter(m => m.quantidade <= m.estoqueMinimo).length;
+            document.getElementById('dash-estoque-critico').innerText = criticos;
 
-            fullHist.innerHTML = state.history.map(h => `
-                <tr>
-                    <td class="px-4 py-2">${h.date}</td>
-                    <td class="px-4 py-2"><span class="px-2 py-1 rounded text-[10px] font-bold ${h.type === 'ENTRADA' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}">${h.type}</span></td>
-                    <td class="px-4 py-2">${h.desc}</td>
-                    <td class="px-4 py-2 font-bold">${h.qty}</td>
-                    <td class="px-4 py-2 text-gray-400">Sistema LPI</td>
-                </tr>
-            `).join('');
-        }
+            // Vencimento Próximo
+            const vencendo = medicamentos.filter(m => isExpiringSoon(m.validade) && !isExpired(m.validade)).length;
+            document.getElementById('dash-proximos-vencimento').innerText = vencendo;
 
-        function deleteMed(id) {
-            state.medicines = state.medicines.filter(m => m.id != id);
-            updateUI();
-        }
+            // Total Pacientes
+            document.getElementById('dash-total-pacientes').innerText = pacientes.length;
 
-        function filterTable(tableId, query) {
-            const rows = document.getElementById(tableId).getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-            for(let row of rows) {
-                row.style.display = row.innerText.toLowerCase().includes(query.toLowerCase()) ? '' : 'none';
+            // Listagem de Alertas Urgentes no Dashboard
+            const alertsList = document.getElementById('dash-alerts-list');
+            alertsList.innerHTML = '';
+            let alertAdded = 0;
+
+            medicamentos.forEach(m => {
+                if (m.quantidade <= m.estoqueMinimo) {
+                    alertAdded++;
+                    alertsList.innerHTML += `
+                        <div class="flex items-center justify-between p-3 bg-rose-50 border border-rose-100 rounded-xl">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-rose-100 text-rose-700 rounded-lg"><i class="fa-solid fa-cubes-stacked"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-800 leading-tight">${m.nome}</h4>
+                                    <span class="text-[10px] text-slate-500">Mínimo: ${m.estoqueMinimo} | Em Estoque: ${m.quantidade}</span>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-rose-100 text-rose-800 font-bold px-2 py-1 rounded">Estoque Baixo</span>
+                        </div>
+                    `;
+                }
+                if (isExpired(m.validade)) {
+                    alertAdded++;
+                    alertsList.innerHTML += `
+                        <div class="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-red-100 text-red-700 rounded-lg"><i class="fa-solid fa-calendar-xmark"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-800 leading-tight">${m.nome}</h4>
+                                    <span class="text-[10px] text-slate-500">Validade expirada em: ${formatDate(m.validade)}</span>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-red-100 text-red-800 font-bold px-2 py-1 rounded">VENCIDO</span>
+                        </div>
+                    `;
+                }
+            });
+
+            if (alertAdded === 0) {
+                alertsList.innerHTML = `<div class="text-center text-slate-400 py-12 text-sm"><i class="fa-solid fa-circle-check text-emerald-500 text-2xl block mb-2"></i>Tudo sob controle. Nenhum alerta crítico.</div>`;
+            }
+
+            // Atividades Recentes
+            const recentAct = document.getElementById('dash-recent-activities');
+            recentAct.innerHTML = '';
+
+            const sortedMov = [...movimentacoes].sort((a, b) => new Date(b.data) - new Date(a.data)).slice(0, 5);
+
+            if (sortedMov.length === 0) {
+                recentAct.innerHTML = `<div class="text-center text-slate-400 py-12 text-sm">Nenhuma atividade registrada no sistema.</div>`;
+            } else {
+                sortedMov.forEach(mov => {
+                    const med = medicamentos.find(m => m.id === mov.medicamentoId) || { nome: 'Item Removido' };
+                    const isEntrada = mov.tipo === 'ENTRADA';
+                    const actIcon = isEntrada 
+                        ? '<div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-plus text-xs"></i></div>'
+                        : '<div class="p-2 bg-rose-50 text-rose-600 rounded-lg"><i class="fa-solid fa-minus text-xs"></i></div>';
+
+                    const details = isEntrada 
+                        ? 'Reabastecimento administrativo de lote.'
+                        : `Dispensado para o paciente ${mov.pacienteVinculado ? mov.pacienteVinculado.nome : 'Não identificado'}.`;
+
+                    recentAct.innerHTML += `
+                        <div class="flex items-start space-x-3 border-b border-slate-50 pb-3">
+                            ${actIcon}
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-slate-800 truncate">${mov.quantidade}x ${med.nome}</p>
+                                <p class="text-xs text-slate-400 truncate">${details}</p>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-mono">${timeAgo(new Date(mov.data))}</span>
+                        </div>
+                    `;
+                });
             }
         }
 
-        function initApp() {
-            updateUI();
+        // TELA 6: RELATÓRIOS CONSOLIDADOS
+        function renderRelatorios() {
+            // Itens Críticos
+            const critList = document.getElementById('rep-itens-criticos');
+            critList.innerHTML = '';
+            
+            const criticos = medicamentos.filter(m => m.quantidade <= m.estoqueMinimo || isExpired(m.validade));
+            if (criticos.length === 0) {
+                critList.innerHTML = `<p class="text-slate-400 italic py-4">Estoque operando com 100% de estabilidade.</p>`;
+            } else {
+                criticos.forEach(m => {
+                    let text = `<span class="text-amber-700 font-semibold">[Estoque Baixo]</span> ${m.nome} (Qtd: ${m.quantidade})`;
+                    if (isExpired(m.validade)) {
+                        text = `<span class="text-red-700 font-bold">[EXPIRADO]</span> ${m.nome} (${formatDate(m.validade)})`;
+                    }
+                    critList.innerHTML += `<li class="py-1 border-b border-slate-200/40">${text}</li>`;
+                });
+            }
+
+            // Divisão por categoria
+            const catDiv = document.getElementById('rep-categorias');
+            catDiv.innerHTML = '';
+            
+            const cats = {};
+            medicamentos.forEach(m => {
+                cats[m.categoria] = (cats[m.categoria] || 0) + m.quantidade;
+            });
+
+            for (const [key, val] of Object.entries(cats)) {
+                catDiv.innerHTML += `
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[11px] font-medium text-slate-600">
+                            <span>${key}</span>
+                            <span>${val} unidades</span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-cyan-600 h-1.5" style="width: ${Math.min(val, 100)}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Auditoria
+            const entradas = movimentacoes.filter(m => m.tipo === 'ENTRADA').length;
+            const saidas = movimentacoes.filter(m => m.tipo === 'SAIDA').length;
+            const volumeTotal = medicamentos.reduce((acc, curr) => acc + curr.quantidade, 0);
+
+            document.getElementById('rep-tot-entradas').innerText = entradas;
+            document.getElementById('rep-tot-saidas').innerText = saidas;
+            document.getElementById('rep-vol-total').innerText = `${volumeTotal} un`;
+
+            const taxaCrit = volumeTotal > 0 ? Math.round((criticos.length / medicamentos.length) * 100) : 0;
+            document.getElementById('rep-taxa-critica').innerText = `${taxaCrit}%`;
+
+            // Tabela geral consolidada para impressão
+            const rTbody = document.getElementById('rep-table-body');
+            rTbody.innerHTML = '';
+
+            medicamentos.forEach(m => {
+                const isCritico = m.quantidade <= m.estoqueMinimo;
+                const isVencido = isExpired(m.validade);
+                const statusStr = isVencido ? 'VENCIDO' : (isCritico ? 'REABASTECER' : 'ESTÁVEL');
+
+                rTbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-2.5 px-4 font-semibold text-slate-800">${m.nome}</td>
+                        <td class="py-2.5 px-4 text-slate-500">${m.categoria}</td>
+                        <td class="py-2.5 px-4 font-mono text-slate-500">${m.lote}</td>
+                        <td class="py-2.5 px-4 text-center text-slate-400">${m.estoqueMinimo}</td>
+                        <td class="py-2.5 px-4 text-center font-bold text-slate-800">${m.quantidade}</td>
+                        <td class="py-2.5 px-4">${formatDate(m.validade)}</td>
+                        <td class="py-2.5 px-4 text-center font-bold ${isVencido ? 'text-red-600' : (isCritico ? 'text-amber-600' : 'text-emerald-600')}">${statusStr}</td>
+                    </tr>
+                `;
+            });
         }
 
-        // Inicializar com Dashboard visível se já logado (no contexto real)
-        window.onload = () => {
-            // Se já houver sessão, pularia login. Aqui mantemos manual.
-        };
+        // SELEÇÃO DINÂMICA DE COMBOS
+        function populateSelects() {
+            // Select de medicamentos na tela de movimentação
+            const medSelect = document.getElementById('mov-medicamento-id');
+            const cachedVal = medSelect.value;
+            medSelect.innerHTML = '<option value="">Selecione o item...</option>';
+            medicamentos.forEach(m => {
+                medSelect.innerHTML += `<option value="${m.id}">${m.nome} (Lote: ${m.lote} - Saldo: ${m.quantidade})</option>`;
+            });
+            medSelect.value = cachedVal;
+
+            // Select de Paciente na tela de movimentação
+            const pacSelect = document.getElementById('mov-paciente-id');
+            const cachedPac = pacSelect.value;
+            pacSelect.innerHTML = '<option value="">-- Selecionar Paciente --</option>';
+            pacientes.forEach(p => {
+                pacSelect.innerHTML += `<option value="${p.id}">${p.nome}</option>`;
+            });
+            pacSelect.value = cachedPac;
+        }
+
+        // CONSULTA RÁPIDA DE SALDO
+        function filterQuickSearch() {
+            const input = document.getElementById('quick-search-input').value.toLowerCase();
+            const container = document.getElementById('quick-search-results-container');
+            const tbody = document.getElementById('quick-search-results');
+
+            if (!input) {
+                container.classList.add('hidden');
+                tbody.innerHTML = '';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            const filtered = medicamentos.filter(m => m.nome.toLowerCase().includes(input));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-400 text-xs">Nenhum resultado para a busca.</td></tr>`;
+            } else {
+                filtered.forEach(m => {
+                    const isCritico = m.quantidade <= m.estoqueMinimo;
+                    const isVencido = isExpired(m.validade);
+                    const isQuaseVencido = isExpiringSoon(m.validade);
+
+                    let badge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] rounded">ESTÁVEL</span>';
+                    if (isVencido) badge = '<span class="px-2 py-0.5 bg-red-100 text-red-800 text-[10px] rounded">VENCIDO</span>';
+                    else if (isQuaseVencido) badge = '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] rounded">RISCO VALIDADE</span>';
+                    else if (isCritico) badge = '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 text-[10px] rounded">SALDO CRÍTICO</span>';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-2.5 px-4 font-bold text-slate-800">${m.nome}</td>
+                            <td class="py-2.5 px-4 text-slate-500">${m.categoria}</td>
+                            <td class="py-2.5 px-4 font-mono text-slate-500">${m.lote}</td>
+                            <td class="py-2.5 px-4 text-center font-bold text-slate-900 bg-slate-100/30">${m.quantidade}</td>
+                            <td class="py-2.5 px-4 text-slate-500">${formatDate(m.validade)}</td>
+                            <td class="py-2.5 px-4 text-center">${badge}</td>
+                        </tr>
+                    `;
+                });
+            }
+            container.classList.remove('hidden');
+        }
+
+        // FUNÇÕES AUXILIARES / INTERNACIONAIS DE DATA
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Sem validade';
+            const parts = dateStr.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function isExpired(dateStr) {
+            if (!dateStr) return false;
+            const target = new Date(dateStr);
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+            return target < hoje;
+        }
+
+        function isExpiringSoon(dateStr) {
+            if (!dateStr) return false;
+            const target = new Date(dateStr);
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+            const diffTime = target - hoje;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays >= 0 && diffDays <= 30; // Vence em até 30 dias
+        }
+
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = Math.floor(seconds / 31536000);
+            if (interval >= 1) return `há ${interval} ano(s)`;
+            interval = Math.floor(seconds / 2592000);
+            if (interval >= 1) return `há ${interval} mês(es)`;
+            interval = Math.floor(seconds / 86400);
+            if (interval >= 1) return `há ${interval} dia(s)`;
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) return `há ${interval} hora(s)`;
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) return `há ${interval} minuto(s)`;
+            return 'agora mesmo';
+        }
+
+        // TOAST FEEDBACKS
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const text = document.getElementById('toast-message');
+
+            text.innerText = message;
+            if (type === "success") {
+                icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>';
+            } else {
+                icon.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-500 text-lg"></i>';
+            }
+
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 3500);
+        }
     </script>
 </body>
 </html>
